@@ -2,8 +2,13 @@ package org.example;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.imageio.IIOException;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Scanner;
 
@@ -12,6 +17,16 @@ public class Main {
 
         String[][] tasks = readFromFile(); // wczytanie danych z pliku do tablicy
 
+        do {
+            if (chooseMethod(tasks) == true) {
+                break;
+            }
+            chooseMethod(tasks);
+        } while (true);
+    }
+
+    public static boolean chooseMethod (String [][] tasks){
+        // metoda zwraca true w przypadku wybrania opcji "exit" i zapisania danych do pliku
         do {
             String option = Menu();
             if (option.equals("add")){
@@ -22,11 +37,29 @@ public class Main {
             }else if(option.equals("list")){
                 listTable(tasks);
             }else if(option.equals("exit")){
-                System.out.println("Wybrano: exit");//test
-                break;//test do usuniecia
+                exitMethod(tasks);
+                break;
             }
         }while (true);
+        return true;
     }
+
+
+    public static void exitMethod(String[][] tasks) {
+        Path newFilePath = Paths.get("tasks.csv");
+        String line = null;
+        //zapis do pliku
+        try (PrintWriter printWriter = new PrintWriter("tasks.csv")) {
+            for (int i = 0; i < tasks.length; i++) {
+                line = StringUtils.join(tasks[i], ", ");
+                printWriter.println(line);
+            }
+        } catch (FileNotFoundException e) {
+            System.out.println("Error write to file: tasks.csv");
+        }
+    }
+
+
 
     public static String[][] addRecord(String[][] tasks){
         System.out.println("Please add task description");
@@ -70,31 +103,18 @@ public class Main {
 
     public static String[][] readFromFile(){
         String[][] tasksFromFile = new String[0][2];
-        //String[] table2 = new String[2];
-
-
         File file = new File("tasks.csv");
         try (Scanner scanner = new Scanner(file)) {
             while(scanner.hasNextLine()) {
                 String line = scanner.nextLine();
                 String split[] = line.split(", ");
-                //System.out.println("split: " + split.length);
-//                for (int i=0; i < split.length; i++){
-//                    System.out.println(ArrayUtils.toString(split[i]));
-//                    table2[i] = split[i];
-//
-//                }
-                //System.out.println("Table2 to string: " +StringUtils.join( split, ","));
-                //utworz tablice z stringa, np.split
-                //stworz dynamiczna tablice dwuwymiarowa
-                //dodaj elementy do tablicy
-                //System.out.println(scanner.nextLine());
                 tasksFromFile = addNewItem(tasksFromFile, split);
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        return tasksFromFile;// zworc tablice dwuwymiarowa;
+        return tasksFromFile;// zwroc tablice dwuwymiarowa;
+        //sprawdzic obsluge wyjatku
     }
 
     public static String[][] addNewItem(String[][] arr, String[] arr2) {
@@ -114,27 +134,27 @@ public class Main {
                 }
             }
             System.out.println(ConsoleColors.WHITE_BRIGHT + "");
-
         }
     }
 
-    public static String Menu(){
+    public static String Menu() {
         Scanner scan = new Scanner(System.in);
         String line = null;
-
-        do {
+        while (true) {
             System.out.println(ConsoleColors.BLUE + "Please select an option:");
             System.out.println(ConsoleColors.WHITE_BRIGHT + "add");
             System.out.println(ConsoleColors.WHITE_BRIGHT + "remove");
             System.out.println(ConsoleColors.WHITE_BRIGHT + "list");
             System.out.println(ConsoleColors.WHITE_BRIGHT + "exit");
             line = scan.nextLine();
-            if ((line.equals("add")) | (line.equals("remove")) || (line.equals("list")) || (line.equals("exit"))) {
+            if ((line.equals("add")) || (line.equals("remove")) || (line.equals("list")) || (line.equals("exit"))) {
                 break;
             }
-        } while (true);//(!line.equals("add")); //||(line.equals("remove"))||(line.equals("list"))||(line.equals("exit")));
+        }
         return line;
     }
+
+
 
 
     /**
