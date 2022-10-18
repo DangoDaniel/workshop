@@ -1,12 +1,8 @@
 package org.example;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-
-import javax.imageio.IIOException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -25,15 +21,43 @@ public class Main {
         } while (true);
     }
 
+    public static String[][] removeRecord(String[][] taskBeforeRemove) {
+        String[][] tasks = new String[0][2];
+        int index = 0;
+        System.out.println("Please select number to remove.");
+        Scanner scanner = new Scanner(System.in);
+        do {
+            while (!scanner.hasNextInt()) {
+                System.out.println("Please select number to remove.");
+                scanner.nextLine();
+            }
+            index = scanner.nextInt();
+            if ((index >= 0) && (index < taskBeforeRemove.length)) {
+                break;
+            }
+            System.out.println("Please select number to remove.");
+        } while (true);
+        for (int i = 0; i < taskBeforeRemove.length; i++) {
+            if (i < index) {
+                tasks = addNewItem(tasks, taskBeforeRemove[i]);
+            } else {
+                if (i < taskBeforeRemove.length - 1) {
+                    tasks = addNewItem(tasks, taskBeforeRemove[i + 1]);
+                }
+            }
+        }
+        System.out.println("Value was successfully deleted.");
+        return tasks;
+    }
+
     public static boolean chooseMethod (String [][] tasks){
         // metoda zwraca true w przypadku wybrania opcji "exit" i zapisania danych do pliku
         do {
             String option = Menu();
             if (option.equals("add")){
-                System.out.println("Wybrano: add");//test
-                tasks = addRecord(tasks);
+               tasks = addRecord(tasks);
             }else if(option.equals("remove")){
-                System.out.println("Wybrano: remove");//test
+                tasks = removeRecord(tasks);
             }else if(option.equals("list")){
                 listTable(tasks);
             }else if(option.equals("exit")){
@@ -44,21 +68,18 @@ public class Main {
         return true;
     }
 
-
     public static void exitMethod(String[][] tasks) {
         Path newFilePath = Paths.get("tasks.csv");
         String line = null;
-        //zapis do pliku
         try (PrintWriter printWriter = new PrintWriter("tasks.csv")) {
             for (int i = 0; i < tasks.length; i++) {
                 line = StringUtils.join(tasks[i], ", ");
                 printWriter.println(line);
             }
         } catch (FileNotFoundException e) {
-            System.out.println("Error write to file: tasks.csv");
+            System.out.println("Error write to file");
         }
     }
-
 
 
     public static String[][] addRecord(String[][] tasks){
@@ -77,6 +98,10 @@ public class Main {
     }
 
       public static String inputString(String str, int i){
+//           metoda przyjmuje dwa argumenty
+//           String str - tresc polecenia
+//           int i: 0 - przyjmuje dowolna wartosc, nie przyjmie "enter-a" ale przymie wiele spacji itd
+//           int i: 1 - przyjmie tylko wartosc true/false
         String line = null;
         do {
             do {
@@ -111,10 +136,12 @@ public class Main {
                 tasksFromFile = addNewItem(tasksFromFile, split);
             }
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            System.out.println(ConsoleColors.RED + "Warning !!!");
+            System.out.println(ConsoleColors.RED + "Database file not found");
+            System.out.println(ConsoleColors.RED + "Starting with empty database");
+            System.out.println(ConsoleColors.WHITE_BRIGHT);
         }
-        return tasksFromFile;// zwroc tablice dwuwymiarowa;
-        //sprawdzic obsluge wyjatku
+        return tasksFromFile;
     }
 
     public static String[][] addNewItem(String[][] arr, String[] arr2) {
@@ -124,6 +151,7 @@ public class Main {
     }
 
     public static void listTable(String[][] tasks) {
+        System.out.println("list");
         for (int i = 0; i < tasks.length; i++) {
             System.out.print(i + " : ");
             for (int j = 0; j < tasks[i].length; j++) {
@@ -135,6 +163,7 @@ public class Main {
             }
             System.out.println(ConsoleColors.WHITE_BRIGHT + "");
         }
+        System.out.println("");
     }
 
     public static String Menu() {
