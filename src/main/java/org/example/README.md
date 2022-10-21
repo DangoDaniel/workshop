@@ -1,0 +1,1 @@
+Rozwiązanie zadania z warsztatu nr 1
